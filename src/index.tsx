@@ -3,13 +3,22 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { GlobalContextProvider } from './shared/contexts/globalContext';
+import { ClientsContextProvider } from './shared/contexts/clientsContext';
+import { RoomContextProvider } from './shared/contexts/roomContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <GlobalContextProvider>
+      <ClientsContextProvider>
+        <RoomContextProvider>
+          <App />
+        </RoomContextProvider>
+      </ClientsContextProvider>
+    </GlobalContextProvider>
   </React.StrictMode>
 );
 
