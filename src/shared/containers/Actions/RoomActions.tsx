@@ -1,6 +1,8 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 
 import { JazzRoom, ScreenShareUserCanceledError } from '@salutejs/jazz-sdk-web';
+import ChatIcon from '@mui/icons-material/Chat';
+
 import { Button } from '@salutejs/plasma-b2c';
 import {
   IconCallEnd,
@@ -17,6 +19,7 @@ import styled from 'styled-components/macro';
 import { useGlobalContext } from '../../contexts/globalContext';
 import { useParticipantMediaMuted } from '../../hooks/useParticipantMediaMuted';
 import { useQuery } from '../../hooks/useQuery';
+import { useRoomContext } from '../../contexts/roomContext';
 
 const IconCallEndCustom = styled(IconCallEnd)`
   color: ${critical};
@@ -48,6 +51,7 @@ export const RoomActions: FC<{ room: JazzRoom; isShowRaiseHand?: boolean }> = ({
   room,
 }) => {
   const localParticipant = useQuery(room.localParticipant);
+  const { setIsChatActive, isChatActive } = useRoomContext();
 
   const { isAudioMuted, isDisplayMuted, isVideoMuted } =
     useParticipantMediaMuted(room, localParticipant);
@@ -56,9 +60,22 @@ export const RoomActions: FC<{ room: JazzRoom; isShowRaiseHand?: boolean }> = ({
     room.leave();
   }, [room]);
 
+  const handleChatClick = () => {
+    setIsChatActive(!isChatActive);
+  }
+
   return (
     <>
+      <Button
+        contentLeft={<ChatIcon data-is-active={isChatActive || undefined} />}
+        pin="circle-circle"
+        view={isChatActive ? 'primary' : 'secondary'}
+        aria-label="chat"
+        title="chat"
+      onClick={handleChatClick}
+      />
       <RequestPermissionVideo isVideoMuted={isVideoMuted} room={room} />
+
       <Button
         contentLeft={<IconCallEndCustom color="inherit" />}
         view="critical"

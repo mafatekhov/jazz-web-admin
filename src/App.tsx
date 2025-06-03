@@ -14,6 +14,7 @@ import {
 } from '@salutejs/jazz-sdk-web-plugins';
 import { InitSDKStatus, SdkInfo } from './widgets/sdk-info/sdk-info';
 import { Grid } from '@mui/material';
+import { GlobalStyles } from './shared/components/GlobalStyles';
 
 function App() {
 
@@ -68,6 +69,7 @@ function App() {
   return (
     <div className="App">
       <Grid display={"flex"} flexDirection={"column"} p={2} sx={{ minHeight: "100vh" }}>
+      <GlobalStyles />
         {sdk && <>
           <AdminPanel />
           <SdkInfo sdkVersion={SDK_VERSION} sdkStatus={status} />

@@ -7,6 +7,7 @@ import { JazzClient, createSdkToken, getLocalDevices, handleEvent } from "@salut
 import { CreateConferenceForm, CreateConferenceModal } from "./Containers/create-conference-modal";
 import { key } from "../../shared/constants/jazz";
 import { useRoomContext } from "../../shared/contexts/roomContext";
+import { JoinToConferenceModal } from "../client-card/Containers/JoinConferenceModal";
 
 export type JoinToConferenceModalForm = {
     password: string;
@@ -17,6 +18,8 @@ export const CreateRoom = () => {
     const { sdk, eventBus } = useGlobalContext();
     const { addClient, removeClient, loginBySdkToken } = useClientsContext();
     const [client, setClient] = useState<JazzClient | null>(null);
+    const [isOpenJoinToConferenceModal, setIsOpenJoinToConferenceModal] =
+        useState(false);
 
     const [conferenceUrl, setConferenceUrl] = useState<string>('')
 
@@ -109,10 +112,11 @@ export const CreateRoom = () => {
     const handleConnectToConference = useCallback(
         async (form: JoinToConferenceModalForm) => {
             // handleCloseJoinToConferenceModal();
+            console.log({ form })
 
             try {
-            await client?.conferences.getDetails({
-                    conferenceId: form.roomId,
+                await client?.conferences.getDetails({
+                    roomId: form.roomId,
                     password: form.password,
                 });
             } catch (error) {
@@ -126,7 +130,7 @@ export const CreateRoom = () => {
             }
 
             const room = client?.conferences.join({
-                conferenceId: form.roomId,
+                roomId: form.roomId,
                 password: form.password,
             });
 
@@ -190,7 +194,7 @@ export const CreateRoom = () => {
             handleCloseCreateConferenceModal();
 
             client?.conferences
-                .createConference({
+                .createRoom({
                     title: form.conferenceName,
                     isLobbyEnabled: form.isLobbyEnabled,
                     isGuestEnabled: form.isGuestEnabled,
@@ -262,6 +266,24 @@ export const CreateRoom = () => {
             });
     }, [client, key, eventBus, loginBySdkToken]);
 
+    const handleJoin = useCallback(() => {
+        if (!client?.auth.isAuthorised.get()) {
+            eventBus({
+                type: 'error',
+                payload: {
+                    title: 'To join the conference, you need to sign in',
+                },
+            });
+            return;
+        }
+        setIsOpenJoinToConferenceModal(true);
+    }, [eventBus, client]);
+
+    const handleCloseJoinToConferenceModal = useCallback(() => {
+        setIsOpenJoinToConferenceModal(false);
+    }, []);
+
+
 
     const handleCopy = useCallback(() => {
         navigator.clipboard.writeText(conferenceUrl)
@@ -272,12 +294,20 @@ export const CreateRoom = () => {
             Create Room
         </Button>
         {conferenceUrl && <Button onClick={handleCopy}>Copy conferece url</Button>}
+        {client && <Button onClick={handleJoin}>Join the meeting</Button>}
 
         {client && <CreateConferenceModal
             client={client}
             isOpen={isOpenCreateConferenceModal}
             onClose={handleCloseCreateConferenceModal}
             onCreate={handleCreateConference}
+        />}
+
+        {client && <JoinToConferenceModal
+            isOpen={isOpenJoinToConferenceModal}
+            client={client}
+            onClose={handleCloseJoinToConferenceModal}
+            onJoin={handleConnectToConference}
         />}
     </Grid>)
 }

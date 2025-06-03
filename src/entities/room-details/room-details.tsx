@@ -6,6 +6,7 @@ import { RoomActions } from "../../shared/containers/Actions";
 import { Participants } from "./Containers/Participants";
 import { Header } from "./Containers/Header/Header";
 import { LobbyModalController } from "./Containers/LobbyModalController";
+import { ChatBox } from "./Containers/Chat/Chat";
 
 const Wrapper = styled(Grid)`
     display: flex;
@@ -43,7 +44,7 @@ const Footer = styled(Grid)`
 `
 
 export const RoomDetails = () => {
-    const { room, eventBus } = useRoomContext();
+    const { room, eventBus, isChatActive } = useRoomContext();
     if (!room) return <></>
 
     return (<Wrapper container>
@@ -52,7 +53,7 @@ export const RoomDetails = () => {
         </HeaderContent>
         <Grid display={"flex"} flexDirection={"row"} flexGrow={1}>
             <Left>
-                <Participants room={room} />
+                {isChatActive ? <ChatBox /> :<Participants room={room} />}
             </Left>
             <Main>
                 <MainContent room={room} />
