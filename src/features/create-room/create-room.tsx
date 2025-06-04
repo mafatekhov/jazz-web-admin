@@ -111,8 +111,6 @@ export const CreateRoom = () => {
 
     const handleConnectToConference = useCallback(
         async (form: JoinToConferenceModalForm) => {
-            // handleCloseJoinToConferenceModal();
-            console.log({ form })
 
             try {
                 await client?.conferences.getDetails({
