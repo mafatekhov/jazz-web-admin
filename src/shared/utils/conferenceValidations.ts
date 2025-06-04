@@ -13,13 +13,14 @@ export type ValidateConferenceForm = {
   userName?: string;
   roomId?: string;
   password?: string;
+  url?: string;
 };
 
 export type ErrorReport = string | undefined;
 
 export type ValidateReport = Record<string, ErrorReport>;
 
-type ValidateFunction = (value: string) => ErrorReport;
+type ValidateFunction = (value: string, form: ValidateConferenceForm) => ErrorReport;
 
 const hasOnlyAllowedSymbols = (value: string): boolean =>
   ALLOWED_CHARS_REGEX.test(value);
@@ -35,19 +36,28 @@ const validates: Record<string, ValidateFunction> = {
     return undefined;
   },
   userName: (value) => {
+
     if (!value || isEmpty(value)) return 'empty user name';
     if (!hasOnlyAllowedSymbolsWithEmoji(value))
       return 'conference name include not allowed chars';
     return undefined;
   },
-  roomId: (value) => {
+  roomId: (value, form) => {
+    if(form.url) return undefined; // Skip validation if URL is provided
     if (!value || isEmpty(value)) return 'empty id';
     if (hasSpaces(value)) return 'id include spaces';
     return undefined;
   },
-  password: (value) => {
+  password: (value, form) => {
+    if(form.url) return undefined; // Skip validation if URL is provided
     if (!value || isEmpty(value)) return 'empty password';
     if (hasSpaces(value)) return 'password include spaces';
+    return undefined;
+  },
+  url: (value, form) => {
+    if(form.password && form.roomId) return undefined; // Skip validation if URL is provided
+    if (!value || isEmpty(value)) return 'empty url';
+    if (hasSpaces(value)) return 'url include spaces';
     return undefined;
   },
 };
@@ -57,7 +67,7 @@ export function validateConferenceForm(
 ): ValidateReport {
   return Object.entries(form).reduce<ValidateReport>((calc, [field, value]) => {
     if (validates[field] && value !== undefined) {
-      const result = validates[field](value);
+      const result = validates[field](value, form);
 
       if (result) {
         calc[field] = result;
